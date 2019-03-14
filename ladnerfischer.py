@@ -44,7 +44,7 @@ def ladnerfischer_work(level, rank, size, ranks, calls):
 
             # broadcast from last rank of left side to others
             if new_rank == len(new_ranks) - 1:
-                calls.insert(0, ('broadcast', ranks[new_size], new_size))
+                calls.insert(0, ('broadcast', ranks[new_size:]))
             ladnerfischer_work(1, new_rank, new_size, new_ranks, calls)
         else:
             new_ranks = ranks[new_size:size]
@@ -57,16 +57,31 @@ assert ladnerfischer(0, 2) == [('send', 1)]
 assert ladnerfischer(1, 2) == [('receive', 0)]
 
 assert ladnerfischer(0, 4) == [('send', 1)]
-assert ladnerfischer(1, 4) == [('receive', 0), ('broadcast', 2, 2)]
+assert ladnerfischer(1, 4) == [('receive', 0), ('broadcast', [2, 3])]
 assert ladnerfischer(2, 4) == [('send', 3), ('broadcast_recv', 1)]
 assert ladnerfischer(3, 4) == [('receive', 2), ('broadcast_recv', 1)]
 
 assert ladnerfischer(0, 8) == [('send', 1)]
 assert ladnerfischer(1, 8) == [('receive', 0), ('send', 3), ('send', 2)]
 assert ladnerfischer(2, 8) == [('send', 3), ('receive', 1)]
-assert ladnerfischer(3, 8) == [('receive', 2), ('receive', 1), ('broadcast', 4, 4)]
+assert ladnerfischer(3, 8) == [('receive', 2), ('receive', 1), ('broadcast', [4, 5, 6, 7])]
 assert ladnerfischer(4, 8) == [('send', 5), ('broadcast_recv', 3)]
-assert ladnerfischer(5, 8) == [('receive', 4), ('broadcast', 6, 2), ('broadcast_recv', 3)]
+assert ladnerfischer(5, 8) == [('receive', 4), ('broadcast', [6, 7]), ('broadcast_recv', 3)]
 assert ladnerfischer(6, 8) == [('send', 7), ('broadcast_recv', 5), ('broadcast_recv', 3)]
 assert ladnerfischer(7, 8) == [('receive', 6), ('broadcast_recv', 5), ('broadcast_recv', 3)]
 
+assert ladnerfischer(0, 16) == [('send', 1)]
+assert ladnerfischer(1, 16) == [('receive', 0), ('send', 3), ('send', 2)]
+assert ladnerfischer(2, 16) == [('send', 3), ('receive', 1)]
+assert ladnerfischer(3, 16) == [('receive', 2), ('receive', 1), ('broadcast', [5, 7]), ('send', 4)]
+assert ladnerfischer(4, 16) == [('send', 5), ('receive', 3)]
+assert ladnerfischer(5, 16) == [('receive', 4), ('send', 7), ('broadcast_recv', 3), ('send', 6)]
+assert ladnerfischer(7, 16) == [('receive', 6), ('receive', 5), ('broadcast_recv', 3), ('broadcast', [8, 9, 10, 11, 12, 13, 14, 15])]
+assert ladnerfischer(8, 16) == [('send', 9), ('broadcast_recv', 7)]
+assert ladnerfischer(9, 16) == [('receive', 8), ('send', 11), ('send', 10), ('broadcast_recv', 7)]
+assert ladnerfischer(10, 16) == [('send', 11), ('receive', 9), ('broadcast_recv', 7)]
+assert ladnerfischer(11, 16) == [('receive', 10), ('receive', 9), ('broadcast', [12, 13, 14, 15]), ('broadcast_recv', 7)]
+assert ladnerfischer(12, 16) == [('send', 13), ('broadcast_recv', 11), ('broadcast_recv', 7)]
+assert ladnerfischer(13, 16) == [('receive', 12), ('broadcast', [14, 15]), ('broadcast_recv', 11), ('broadcast_recv', 7)]
+assert ladnerfischer(14, 16) == [('send', 15), ('broadcast_recv', 13), ('broadcast_recv', 11), ('broadcast_recv', 7)]
+assert ladnerfischer(15, 16) == [('receive', 14), ('broadcast_recv', 13), ('broadcast_recv', 11), ('broadcast_recv', 7)]
